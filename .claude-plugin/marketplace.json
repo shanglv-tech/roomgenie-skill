@@ -1,0 +1,23 @@
+{
+  "name": "roomgenie-marketplace",
+  "owner": {
+    "name": "roomgenie"
+  },
+  "metadata": {
+    "description": "Intelligent hotel search and recommendation. Find the perfect stay with smart filtering, price comparison, and personalized recommendations."
+  },
+  "plugins": [
+    {
+      "name": "roomgenie",
+      "description": "RoomGenie - Intelligent hotel search and recommendation. Find the perfect stay with smart filtering, price comparison, and personalized recommendations.",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/roomgenie/roomgenie-skill.git"
+      },
+      "version": "0.1.0",
+      "author": {
+        "name": "roomgenie"
+      }
+    }
+  ]
+}

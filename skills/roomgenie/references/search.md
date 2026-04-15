@@ -1,0 +1,48 @@
+
+# Search Command Reference
+
+## Simple Search (search)
+
+Natural-language hotel search across all accommodation types.
+
+### Parameters
+
+- **--city** (required): City name for hotel search
+- **--keyword** (optional): Search keywords for hotel name, amenities, or nearby attractions
+- **--check-in** (optional): Check-in date (`YYYY-MM-DD`)
+- **--check-out** (optional): Check-out date (`YYYY-MM-DD`)
+
+### Examples
+
+```bash
+roomgenie search --city "Beijing"
+roomgenie search --city "Shanghai" --keyword "budget"
+roomgenie search --city "Hangzhou" --check-in 2026-04-15 --check-out 2026-04-20
+```
+
+### Output Example
+
+```json
+{
+  "data": {
+    "itemList": [
+      {
+        "id": "hotel_001",
+        "name": "Beijing Grand Hotel",
+        "address": "123 Main Street, Chaoyang District, Beijing",
+        "rating": 4.8,
+        "reviewCount": 2345,
+        "price": "¥599",
+        "currency": "CNY",
+        "imageUrl": "https://example.com/hotel.jpg",
+        "bookingUrl": "https://example.com/book/hotel_001",
+        "amenities": ["Free WiFi", "Air Conditioning", "Swimming Pool"],
+        "starRating": 5,
+        "distance": "2.5 km from city center"
+      }
+    ]
+  },
+  "message": "success",
+  "status": 0
+}
+```

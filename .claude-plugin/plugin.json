@@ -1,0 +1,30 @@
+{
+  "name": "roomgenie",
+  "description": "RoomGenie - Intelligent hotel search and recommendation. Find the perfect stay with smart filtering, price comparison, and personalized recommendations.",
+  "version": "0.1.0",
+  "author": {
+    "name": "roomgenie",
+    "url": "https://github.com/roomgenie"
+  },
+  "homepage": "https://github.com/roomgenie/roomgenie-skill",
+  "repository": "https://github.com/roomgenie/roomgenie-skill",
+  "license": "MIT",
+  "category": "travel",
+  "keywords": [
+    "hotel",
+    "accommodation",
+    "travel",
+    "booking",
+    "room",
+    "stay",
+    "vacation",
+    "resort",
+    "hotel search",
+    "hotel booking",
+    "price comparison",
+    "酒店",
+    "住宿",
+    "预订",
+    "旅游"
+  ]
+}
