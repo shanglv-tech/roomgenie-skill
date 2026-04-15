@@ -21,3 +21,6 @@ Thumbs.db
 
 # Project context (not public)
 PROJECT_CONTEXT.md
+
+# Local Claude config
+.claude/
