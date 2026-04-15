@@ -6,7 +6,7 @@ const profileManager = require('./lib/profile-manager');
 let sessionCounter = 0;
 const SESSION_ID = 'roomgenie-session-' + Date.now();
 
-async function run(userInput) {
+function run(userInput) {
   try {
     // 处理用户输入
     const result = dialogEngine.processUserInput(SESSION_ID, userInput);
@@ -20,7 +20,7 @@ async function run(userInput) {
 
     if (result.type === 'recommendation') {
       // 调用搜索
-      const searchResult = await cliAdapter.searchHotels(result.searchParams);
+      const searchResult = cliAdapter.searchHotels(result.searchParams);
 
       // 记录搜索历史
       profileManager.addRecentSearch(result.searchParams);
@@ -114,7 +114,6 @@ module.exports = {
 // 如果直接运行，提供简单测试
 if (require.main === module) {
   const testInput = process.argv[2] || '我想找个酒店';
-  run(testInput).then(result => {
-    console.log(formatMarkdownOutput(result));
-  });
+  const result = run(testInput);
+  console.log(formatMarkdownOutput(result));
 }

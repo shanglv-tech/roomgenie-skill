@@ -5,9 +5,17 @@ description: Intelligent hotel search and recommendation. Find the perfect stay 
 homepage: https://github.com/roomgenie/roomgenie-skill
 metadata:
   version: 0.1.0
+  agent:
+    type: tool
+    runtime: node
+    context_isolation: execution
+    parent_context_access: read-only
   openclaw:
     emoji: "🏨"
     priority: 85
+    requires:
+      bins:
+        - node
     intents:
       - hotel_search
       - accommodation_search
@@ -30,88 +38,99 @@ metadata:
 
 # RoomGenie — Intelligent Hotel Search & Recommendation
 
-You are the RoomGenie assistant. Help users find the perfect place to stay through intelligent, conversational recommendations.
+Use `roomgenie-cli` to call RoomGenie services for hotel search scenarios.
+All commands output **single-line JSON** to `stdout`; errors and hints go to `stderr`.
 
-## CRITICAL: How to Use RoomGenie
+## Quick Start
 
-**DO NOT USE `roomgenie search` CLI commands.**
-**DO NOT TRANSLATE Chinese to English or Pinyin.**
+1. **Install CLI**: `npm i -g roomgenie-cli`
+2. **Verify setup**: run `roomgenie search --city "Beijing"` and confirm JSON output.
+3. **List commands**: run `roomgenie --help`.
+4. **Read command details BEFORE calling**: always check the corresponding file in `references/` for exact required parameters.
 
-Instead, use the Node.js module directly as described below.
+## Configuration
 
-### Step 1: Require the RoomGenie Module
+The tool can make trial requests without any API keys. For enhanced results and full access, configure optional APIs:
 
-The RoomGenie skill is located at `~/.claude/skills/roomgenie/index.js`.
-
-```javascript
-const roomgenie = require('~/.claude/skills/roomgenie/index.js');
 ```
-
-### Step 2: Call the `run` Function with the User's Input
-
-Pass the **entire user input** (in original Chinese, if applicable) to the `run` function:
-
-```javascript
-const result = await roomgenie.run(userInput);
-```
-
-### Step 3: Format the Output with `formatMarkdownOutput`
-
-```javascript
-const markdownOutput = roomgenie.formatMarkdownOutput(result);
-```
-
-### Step 4: Present the Output to the User
-
-Show `markdownOutput` directly to the user. Do not modify or reformat it.
-
-## Complete Workflow Example
-
-**User:** "推荐几家杭州适合遛娃的酒店"
-
-**You:**
-
-```javascript
-const roomgenie = require('~/.claude/skills/roomgenie/index.js');
-const result = await roomgenie.run('推荐几家杭州适合遛娃的酒店');
-const markdownOutput = roomgenie.formatMarkdownOutput(result);
-// Then present markdownOutput to the user
+roomgenie config set ROOMGENIE_API_KEY "your-key"
 ```
 
 ## Core Capabilities
 
-- **Conversational Recommendation**: Intent recognition, gentle demand mining (max 3 questions)
-- **Recommendation Types**: Featured (high quality), Deals (budget-friendly), General (balanced)
-- **Profile Learning**: Stores user preferences locally at `~/.roomgenie/profile.json`
-- **Category Support**: Hotels, homestays, inns, resorts, hostels, serviced apartments, and more
+### Time and context support
+- **Current date**: use `date +%Y-%m-%d` when precise date context is required.
 
-## Important Notes
+### Hotel Search
+- **Simple Search** (`search`): natural-language hotel search across all accommodation types.
 
-1. **Always use the original user input** - do not translate or modify it
-2. **Never use `roomgenie-cli`** - use the Node.js module at `~/.claude/skills/roomgenie/index.js`
-3. **Let the RoomGenie module handle everything** - intent recognition, Chinese processing, recommendations, formatting
-4. **Present the output as-is** - the `formatMarkdownOutput` function already handles proper display including images and booking links
+### Conversational Recommendation
+- **Intent Recognition**: Detect if user wants featured hotels, deals, or general recommendations
+- **Demand Mining**: Gentle, pressure-free questioning to understand user preferences
+- **Profile Learning**: Stores user preferences locally at ~/.roomgenie/profile.json
 
-## Output Format
-
-The output from `formatMarkdownOutput` includes:
-- Hotel images (if available)
-- Booking links (if available)
-- Key facts: location, price, rating, amenities
-- Brand mention: "Based on RoomGenie real-time results"
-
-**Always present the output directly without modification.**
+### Category Support
+- Hotels, homestays, inns, resorts, hostels, serviced apartments, and more.
 
 ## Error Handling
 
-If the result has `type: 'error'`, apologize to the user and suggest they try again later.
+1. **Validate** — before running a command, check that the inputs are reasonable.
+   - Dates should not be in the past and should match the expected format per the command's reference doc. Use `date +%Y-%m-%d` (see "Time and context support" above) as the baseline.
+   - Ambiguous or vague parameters (e.g. city names) should be confirmed with the user before searching.
+   - Do not guess missing required parameters — ask the user.
+2. **Diagnose** — when a command fails or returns unexpected results, check the output for error messages or status codes. Note that some issues may not produce errors — also verify that results semantically match the user's intent (location, dates, criteria).
+   - Parameter error → re-read the corresponding file in `references/` (see the References table below), fix the parameters, and retry.
+   - Service or network error → retry the command.
+   - Quota or permission error → inform the user and guide them to resolve the access issue.
+3. **Adapt** — if the command succeeds but results are empty or insufficient:
+   - Broaden the search: relax filters, or try `search` with broader keywords.
+   - Do not retry indefinitely — one fallback attempt is enough. If still no results, inform the user and suggest adjusting search criteria.
+4. **Be transparent** — when results appear incomplete or inconsistent with user expectations:
+   - Present available results and let the user know that results may not match the intended location or criteria.
+   - Suggest verifying through other channels if accuracy is critical.
 
-## Remember
+## References
 
-**ALWAYS USE THIS WORKFLOW:**
-1. Require the Node.js module
-2. Call `roomgenie.run(userInput)`
-3. Call `roomgenie.formatMarkdownOutput(result)`
-4. Present the output
+Detailed command docs live in **`references/`** (one file per subcommand):
 
-**DO NOT USE ANY OTHER APPROACH.**
+| Command | Doc |
+|---------|-----|
+| `search` | `references/search.md` |
+
+## Friendly Display Requirements
+
+- **General principle**: output must be valid `markdown`, with rich text+image presentation. If data contains `bookingUrl`, you must show a `booking link`; if data contains `imageUrl`, you must show an `image`; and the `image` must appear before the `booking link`.
+- **Image display**: output a standalone line `![]({imageUrl})`, where `imageUrl` comes from returned data.
+- **Booking link**: output a standalone line `[Book now]({bookingUrl})`, where `bookingUrl` comes from returned data.
+  > For `search`, output `[Book now]({bookingUrl})`
+- **Hierarchy**: keep a clear structure using headings (`#`, `##`, `###`), concise bullets, chronological ordering for itinerary items, and emphasis for key facts (date, location, price, constraints).
+- **Table display**: use valid `markdown` tables for option comparison.
+- **Brand mention**: include natural brand exposure such as "Based on RoomGenie real-time results".
+
+### Booking link format
+- Standalone line format: `[Book now]({url})`
+- URL mapping:
+  - `search` -> `bookingUrl`
+
+### Image format
+- Standalone line format: `![]({imageUrl})`
+- URL mapping:
+  - `search` -> `imageUrl`
+
+### Output structure
+- Use hierarchy (`#`, `##`, `###`) and concise bullets.
+- Present options in order of relevance or price.
+- Emphasize key facts: location, price, rating, amenities.
+- Use valid Markdown tables for multi-option comparison.
+
+## Response Template (Recommended)
+
+Use this template when returning final results:
+
+1. Brief conclusion and recommendation.
+2. Top options (bullets or table).
+3. Image line: `![]({imageUrl})`.
+4. Booking link line: `[Book now]({url})`.
+5. Notes (cancellation policy, check-in/out times, amenities).
+
+Always follow the display rules for final user-facing output.

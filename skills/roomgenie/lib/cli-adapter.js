@@ -1,40 +1,55 @@
-// 尝试使用新的 Node.js API
-let roomgenieCLI = null;
-let useNodeAPI = false;
+const { execSync, spawnSync } = require('child_process');
+const os = require('os');
 
-try {
-  roomgenieCLI = require('roomgenie-cli');
-  useNodeAPI = true;
-} catch (e) {
-  console.log('roomgenie-cli npm package not found, using mock data');
-  useNodeAPI = false;
-}
+function searchHotels({ city, keyword, checkIn, checkOut }) {
+  const args = ['search'];
 
-async function searchHotels({ city, keyword, checkIn, checkOut }) {
-  if (useNodeAPI && roomgenieCLI && roomgenieCLI.searchHotels) {
-    try {
-      // 使用新的 Node.js API
-      const result = await roomgenieCLI.searchHotels({
-        city,
-        keyword,
-        checkIn,
-        checkOut
-      });
+  if (city) {
+    args.push('--city', city);
+  }
+  if (keyword) {
+    args.push('--keyword', keyword);
+  }
+  if (checkIn) {
+    args.push('--check-in', checkIn);
+  }
+  if (checkOut) {
+    args.push('--check-out', checkOut);
+  }
+
+  try {
+    // 方式1：用 spawnSync，不通过 shell，直接传递参数数组
+    const result = spawnSync('roomgenie', args, {
+      encoding: 'utf8',
+      stdio: 'pipe',
+      shell: false // 关键：不通过 shell，避免 Bash 解析
+    });
+
+    if (result.error) {
+      throw result.error;
+    }
+
+    const output = result.stdout.trim();
+
+    // Try to parse JSON output
+    const jsonMatch = output.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
       // 确保返回的数据有 priceNumeric
-      if (result && result.data && result.data.itemList) {
-        result.data.itemList = result.data.itemList.map(hotel => ({
+      if (parsed && parsed.data && parsed.data.itemList) {
+        parsed.data.itemList = parsed.data.itemList.map(hotel => ({
           ...hotel,
           priceNumeric: hotel.priceNumeric || parsePrice(hotel.price)
         }));
       }
-      return result;
-    } catch (e) {
-      console.error('Error calling roomgenie-cli API:', e.message);
-      // 出错时回退到 mock 数据
-      return getMockHotels(city);
+      return parsed;
     }
-  } else {
-    // 没有 npm 包时使用 mock 数据
+
+    // Fallback: return mock data
+    return getMockHotels(city);
+  } catch (e) {
+    console.error('Error calling roomgenie-cli:', e.message);
+    // Return mock data when CLI fails
     return getMockHotels(city);
   }
 }
