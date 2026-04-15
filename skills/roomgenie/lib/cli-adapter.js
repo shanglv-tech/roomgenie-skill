@@ -1,30 +1,48 @@
-const { execSync } = require('child_process');
+// 尝试使用新的 Node.js API
+let roomgenieCLI = null;
+let useNodeAPI = false;
 
-function searchHotels({ city, keyword, checkIn, checkOut }) {
-  let cmd = 'roomgenie search';
+try {
+  roomgenieCLI = require('roomgenie-cli');
+  useNodeAPI = true;
+} catch (e) {
+  console.log('roomgenie-cli npm package not found, using mock data');
+  useNodeAPI = false;
+}
 
-  if (city) cmd += ` --city "${city}"`;
-  if (keyword) cmd += ` --keyword "${keyword}"`;
-  if (checkIn) cmd += ` --check-in "${checkIn}"`;
-  if (checkOut) cmd += ` --check-out "${checkOut}"`;
-
-  try {
-    const output = execSync(cmd, { encoding: 'utf8', stdio: 'pipe' });
-    const trimmed = output.trim();
-
-    // Try to parse JSON output
-    const jsonMatch = trimmed.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
+async function searchHotels({ city, keyword, checkIn, checkOut }) {
+  if (useNodeAPI && roomgenieCLI && roomgenieCLI.searchHotels) {
+    try {
+      // 使用新的 Node.js API
+      const result = await roomgenieCLI.searchHotels({
+        city,
+        keyword,
+        checkIn,
+        checkOut
+      });
+      // 确保返回的数据有 priceNumeric
+      if (result && result.data && result.data.itemList) {
+        result.data.itemList = result.data.itemList.map(hotel => ({
+          ...hotel,
+          priceNumeric: hotel.priceNumeric || parsePrice(hotel.price)
+        }));
+      }
+      return result;
+    } catch (e) {
+      console.error('Error calling roomgenie-cli API:', e.message);
+      // 出错时回退到 mock 数据
+      return getMockHotels(city);
     }
-
-    // Fallback: return mock data for development if CLI not available
-    return getMockHotels(city);
-  } catch (e) {
-    console.error('Error calling roomgenie-cli:', e.message);
-    // Return mock data when CLI fails (for development)
+  } else {
+    // 没有 npm 包时使用 mock 数据
     return getMockHotels(city);
   }
+}
+
+function parsePrice(priceStr) {
+  if (!priceStr) return 0;
+  const match = priceStr.match(/(\d+)/);
+  return match ? parseInt(match[1], 10) : 0;
 }
 
 function getMockHotels(city) {

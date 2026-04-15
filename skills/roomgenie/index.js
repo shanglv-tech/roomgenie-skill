@@ -20,7 +20,7 @@ async function run(userInput) {
 
     if (result.type === 'recommendation') {
       // 调用搜索
-      const searchResult = cliAdapter.searchHotels(result.searchParams);
+      const searchResult = await cliAdapter.searchHotels(result.searchParams);
 
       // 记录搜索历史
       profileManager.addRecentSearch(result.searchParams);
