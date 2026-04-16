@@ -38,18 +38,21 @@ metadata:
 
 # RoomGenie — Intelligent Hotel Search & Recommendation
 
-Use `node cli-wrapper.js` to call RoomGenie services for hotel search and recommendation scenarios.
-The wrapper automatically URL-encodes Chinese parameters (--city, --keyword) before calling roomgenie-cli.
+Use `roomgenie` to call RoomGenie services for hotel search and recommendation scenarios.
+**IMPORTANT**: Before calling the CLI, you MUST URL-encode the `--city` and `--keyword` parameters using `encodeURIComponent()`.
+The CLI will automatically decode these parameters.
 All commands output **single-line JSON** to `stdout`; errors and hints go to `stderr`.
 
 ## Quick Start
 
 1. **Install CLI**: `npm i -g roomgenie-cli`
-2. **Verify setup**: run `node cli-wrapper.js search --city "Beijing"` and confirm JSON output.
+2. **Verify setup**: run `roomgenie search --city "%E5%8C%97%E4%BA%AC"` (URL-encoded "北京") and confirm JSON output.
 3. **List commands**: run `roomgenie --help`.
 4. **Read command details BEFORE calling**: always check the corresponding file in `references/` for exact required parameters.
 
-**Important**: Always use `node cli-wrapper.js` instead of `roomgenie` directly. The wrapper handles URL-encoding for Chinese parameters.
+**CRITICAL**: Always URL-encode `--city` and `--keyword` parameters before calling the CLI. For example:
+- "上海" → `"%E4%B8%8A%E6%B5%B7"`
+- "亲子" → `"%E4%BA%B2%E5%AD%90"`
 
 ## Configuration
 
