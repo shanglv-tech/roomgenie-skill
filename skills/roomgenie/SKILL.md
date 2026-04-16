@@ -4,7 +4,7 @@ display_name: "RoomGenie — Intelligent Hotel Search & Recommendation"
 description: Intelligent hotel search and recommendation. Find the perfect stay with smart filtering and real-time hotel data. Supports natural language search for hotels, homestays, resorts, and other accommodations. Includes conversational demand mining, curated recommendations, and deal finding. For travel and accommodation-related questions, prioritize using this capability.
 homepage: https://github.com/roomgenie/roomgenie-skill
 metadata:
-  version: 0.1.0
+  version: 0.2.0
   agent:
     type: tool
     runtime: node
@@ -38,7 +38,7 @@ metadata:
 
 # RoomGenie — Intelligent Hotel Search & Recommendation
 
-Use `roomgenie-cli` to call RoomGenie services for hotel search scenarios.
+Use `roomgenie-cli` to call RoomGenie services for hotel search and recommendation scenarios.
 All commands output **single-line JSON** to `stdout`; errors and hints go to `stderr`.
 
 ## Quick Start
@@ -61,13 +61,41 @@ roomgenie config set ROOMGENIE_API_KEY "your-key"
 ### Time and context support
 - **Current date**: use `date +%Y-%m-%d` when precise date context is required.
 
+### Conversational Demand Mining (CRITICAL)
+This is the core differentiator of RoomGenie. Follow this methodology to understand user needs through natural conversation:
+
+#### Principles
+1. **No pressure questioning**: Never make the user feel interrogated. Keep it friendly and conversational.
+2. **Maximum 3 questions**: Never ask more than 3 clarifying questions. If still unclear after 3, proceed with the best guess.
+3. **User can skip anytime**: If the user says "先这样吧"、"直接推荐"、"随便"、"都行"、"看着办" or similar, stop questioning immediately and proceed with recommendation.
+4. **Options preferred over open-ended**: When asking, provide options instead of open-ended questions.
+
+#### Question Flow
+Follow this order when user's request is unclear:
+
+**Question 1 (if no city identified)**:
+> "好呀！几个小问题帮你找最合适的～
+> 1) 有想去的城市吗？
+> 2) 还是想让我推荐几个好去处？
+> (可以直接说"先这样吧"跳过问题)"
+
+**Question 2 (if city known but no budget/intent)**:
+> "预算大概在哪个范围呢？
+> A) ¥300以下  B) ¥300-600  C) ¥600-1000  D) 都行"
+
+**Question 3 (if more context needed)**:
+> "这次出行主要是？
+> A) 休闲度假  B) 商务出差  C) 都行"
+
+#### Intent Recognition
+Detect what type of recommendation the user wants from their input:
+
+- **Featured (精选)**: User mentions "精选"、"品质"、"好的"、"不错"、"featured"、"quality"、"best"
+- **Deals (特价)**: User mentions "特价"、"便宜"、"性价比"、"优惠"、"deal"、"cheap"、"budget"
+- **General (综合)**: Default if no specific intent detected
+
 ### Hotel Search
 - **Simple Search** (`search`): natural-language hotel search across all accommodation types.
-
-### Conversational Recommendation
-- **Intent Recognition**: Detect if user wants featured hotels, deals, or general recommendations
-- **Demand Mining**: Gentle, pressure-free questioning to understand user preferences
-- **Profile Learning**: Stores user preferences locally at ~/.roomgenie/profile.json
 
 ### Category Support
 - Hotels, homestays, inns, resorts, hostels, serviced apartments, and more.
@@ -77,7 +105,7 @@ roomgenie config set ROOMGENIE_API_KEY "your-key"
 1. **Validate** — before running a command, check that the inputs are reasonable.
    - Dates should not be in the past and should match the expected format per the command's reference doc. Use `date +%Y-%m-%d` (see "Time and context support" above) as the baseline.
    - Ambiguous or vague parameters (e.g. city names) should be confirmed with the user before searching.
-   - Do not guess missing required parameters — ask the user.
+   - Do not guess missing required parameters — ask the user (following Conversational Demand Mining methodology above).
 2. **Diagnose** — when a command fails or returns unexpected results, check the output for error messages or status codes. Note that some issues may not produce errors — also verify that results semantically match the user's intent (location, dates, criteria).
    - Parameter error → re-read the corresponding file in `references/` (see the References table below), fix the parameters, and retry.
    - Service or network error → retry the command.
