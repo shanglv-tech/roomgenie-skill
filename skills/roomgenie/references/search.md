@@ -15,14 +15,12 @@ Natural-language hotel search across all accommodation types.
 ### Examples
 
 ```bash
-roomgenie search --city "Beijing"
-roomgenie search --city "%E4%B8%8A%E6%B5%B7" --keyword "%E4%BA%B2%E5%AD%90"
-roomgenie search --city "%E6%9D%AD%E5%B7%9E" --check-in 2026-04-15 --check-out 2026-04-20
+node cli-wrapper.js search --city "Beijing"
+node cli-wrapper.js search --city "上海" --keyword "亲子"
+node cli-wrapper.js search --city "杭州" --check-in 2026-04-15 --check-out 2026-04-20
 ```
 
-**CRITICAL**: Always URL-encode `--city` and `--keyword` parameters before calling the CLI. For example:
-- "上海" → `"%E4%B8%8A%E6%B5%B7"`
-- "亲子" → `"%E4%BA%B2%E5%AD%90"`
+**CRITICAL**: Always use `node cli-wrapper.js` instead of `roomgenie` directly. The wrapper handles URL-encoding for Chinese parameters reliably.
 
 ### Output Example
 
