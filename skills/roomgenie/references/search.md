@@ -15,9 +15,18 @@ Natural-language hotel search across all accommodation types.
 ### Examples
 
 ```bash
-roomgenie search --city "Beijing"
+# 中文城市名直接使用
+roomgenie search --city "北京"
+
+# 带关键词搜索
 roomgenie search --city "上海" --keyword "亲子"
+
+# 带日期范围
 roomgenie search --city "杭州" --check-in 2026-04-15 --check-out 2026-04-20
+
+# 英文城市名同样支持
+roomgenie search --city "Beijing"
+roomgenie search --city "Tokyo" --keyword "shibuya"
 ```
 
 ### Output Example
@@ -27,18 +36,18 @@ roomgenie search --city "杭州" --check-in 2026-04-15 --check-out 2026-04-20
   "data": {
     "itemList": [
       {
-        "id": "hotel_001",
-        "name": "Beijing Grand Hotel",
-        "address": "123 Main Street, Chaoyang District, Beijing",
-        "rating": 4.8,
-        "reviewCount": 2345,
-        "price": "¥599",
+        "id": "hotel_1283151",
+        "name": "上海临港美爵酒店",
+        "address": "上海",
+        "rating": 4.7,
+        "reviewCount": 551,
+        "price": "¥400",
         "currency": "CNY",
-        "imageUrl": "https://example.com/hotel.jpg",
-        "bookingUrl": "https://example.com/book/hotel_001",
-        "amenities": ["Free WiFi", "Air Conditioning", "Swimming Pool"],
-        "starRating": 5,
-        "distance": "2.5 km from city center"
+        "imageUrl": "https://p1.zmjiudian.com/120EOXM1Ok_350X350",
+        "bookingUrl": "",
+        "amenities": ["健身房", "室内泳池", "近景点", "近商场"],
+        "starRating": 0,
+        "distance": ""
       }
     ]
   },
@@ -46,3 +55,9 @@ roomgenie search --city "杭州" --check-in 2026-04-15 --check-out 2026-04-20
   "status": 0
 }
 ```
+
+### Important Notes
+
+- **Chinese parameters**: Chinese city names and keywords are supported directly - no URL-encoding needed
+- **UTF-8 native**: Node.js + Commander.js natively handle UTF-8 command line arguments
+- **Date format**: Always use `YYYY-MM-DD` format for check-in/check-out dates
